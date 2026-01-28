@@ -1,0 +1,77 @@
+;
+; Minimalist_Driver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=Minimalist_Driver.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+Minimalist_Driver_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+Minimalist_Driver.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%Minimalist_Driver.DeviceDesc%=Minimalist_Driver_Device, Root\Minimalist_Driver ; TODO: edit hw-id
+
+[Minimalist_Driver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+Minimalist_Driver.sys
+
+;-------------- Service installation
+[Minimalist_Driver_Device.NT.Services]
+AddService = Minimalist_Driver,%SPSVCINST_ASSOCSERVICE%, Minimalist_Driver_Service_Inst
+
+; -------------- Minimalist_Driver driver install sections
+[Minimalist_Driver_Service_Inst]
+DisplayName    = %Minimalist_Driver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\Minimalist_Driver.sys
+
+;
+;--- Minimalist_Driver_Device Coinstaller installation ------
+;
+
+[Minimalist_Driver_Device.NT.CoInstallers]
+AddReg=Minimalist_Driver_Device_CoInstaller_AddReg
+CopyFiles=Minimalist_Driver_Device_CoInstaller_CopyFiles
+
+[Minimalist_Driver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[Minimalist_Driver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[Minimalist_Driver_Device.NT.Wdf]
+KmdfService =  Minimalist_Driver, Minimalist_Driver_wdfsect
+[Minimalist_Driver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "Minimalist_Driver Installation Disk"
+Minimalist_Driver.DeviceDesc = "Minimalist_Driver Device"
+Minimalist_Driver.SVCDESC = "Minimalist_Driver Service"
